@@ -1,0 +1,227 @@
+plugins:
+  - rubocop-rspec
+  - rubocop-rake
+
+AllCops:
+  TargetRubyVersion: 3.4
+
+# Turn off everything by default then go back through
+Metrics:
+  Enabled: false
+Style:
+  Enabled: false
+Layout:
+  Enabled: false
+
+Layout/LineLength:
+  Enabled: true
+  Max: 70
+
+# Don't lint non spec files with the spec rules
+RSpec:
+  Exclude:
+    - spec/lib/**
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: never
+
+# Sadly there are just too many cases where you can't apply a consistent rule
+# for this.
+Naming/MethodParameterName:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Style/AndOr:
+  Enabled: true
+
+# Prefer Foo.method over Foo::method
+Style/ColonMethodCall:
+  Enabled: true
+
+Style/DefWithParentheses:
+  Enabled: true
+
+# Use Ruby >= 1.9 syntax for hashes. Prefer { a: :b } over { :a => :b }.
+Style/HashSyntax:
+  Enabled: true
+  EnforcedShorthandSyntax: either
+
+# Defining a method with parameters needs parentheses.
+Style/MethodDefParentheses:
+  Enabled: true
+
+Style/ParenthesesAroundCondition:
+  Enabled: true
+
+Style/PercentLiteralDelimiters:
+  Enabled: true
+  PreferredDelimiters:
+    default: "()"
+    "%i": "[]"
+    "%I": "[]"
+    "%r": "{}"
+    "%w": "[]"
+    "%W": "[]"
+
+# Use quotes for string literals when they are enough.
+Style/RedundantPercentQ:
+  Enabled: false
+
+Style/RedundantReturn:
+  Enabled: true
+  AllowMultipleReturnValues: true
+
+Style/RegexpLiteral:
+  Enabled: true
+
+Style/Semicolon:
+  Enabled: true
+  AllowAsExpressionSeparator: true
+
+Style/StabbyLambdaParentheses:
+  Enabled: true
+
+Style/TrailingCommaInArguments:
+  Enabled: true
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: true
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: true
+
+# Method definitions after `private` or `protected` isolated calls need one
+# extra level of indentation.
+#
+# We break this rule in context, though, e.g. for private-only concerns,
+# so we leave it disabled.
+Layout/IndentationConsistency:
+  Enabled: false
+  EnforcedStyle: indented_internal_methods
+
+# Detect hard tabs, no hard tabs.
+Layout/IndentationStyle:
+  Enabled: true
+Layout/IndentationWidth:
+  Enabled: false
+Layout/LeadingCommentSpace:
+  Enabled: true
+# Blank lines should not have any spaces.
+Layout/TrailingEmptyLines:
+  Enabled: true
+
+Layout/EmptyLineAfterMagicComment:
+  Enabled: true
+Layout/EmptyLinesAroundBlockBody:
+  Enabled: true
+Layout/EmptyLinesAroundClassBody:
+  Enabled: true
+Layout/EmptyLinesAroundMethodBody:
+  Enabled: true
+Layout/EmptyLinesAroundModuleBody:
+  Enabled: true
+
+Layout/ExtraSpacing:
+  Enabled: true
+  AllowForAlignment: false
+Layout/SpaceAroundOperators:
+  Enabled: true
+  AllowForAlignment: false
+Layout/SpaceAroundEqualsInParameterDefault:
+  Enabled: true
+Layout/SpaceAroundKeyword:
+  Enabled: true
+
+Layout/SpaceAfterColon:
+  Enabled: true
+Layout/SpaceAfterComma:
+  Enabled: true
+
+# Use `foo {}` not `foo{}`.
+Layout/SpaceBeforeBlockBraces:
+  Enabled: true
+Layout/SpaceBeforeComma:
+  Enabled: true
+Layout/SpaceBeforeFirstArg:
+  Enabled: true
+
+# Use `->(x, y) { x + y }` not `-> (x, y) { x + y }`
+Layout/SpaceInLambdaLiteral:
+  Enabled: true
+Layout/SpaceInsideArrayLiteralBrackets:
+  Enabled: true
+  EnforcedStyle: no_space
+  EnforcedStyleForEmptyBrackets: no_space
+# Use `%w[ a b ]` not `%w[ a   b ]`.
+Layout/SpaceInsideArrayPercentLiteral:
+  Enabled: true
+# Use `foo { bar }` not `foo {bar}`.
+# Use `foo { }` not `foo {}`.
+Layout/SpaceInsideBlockBraces:
+  Enabled: true
+  EnforcedStyleForEmptyBraces: space
+# Use `{ a: 1 }` not `{a:1}`.
+# Use `{}` not `{  }`.
+Layout/SpaceInsideHashLiteralBraces:
+  Enabled: true
+  EnforcedStyle: space
+  EnforcedStyleForEmptyBraces: no_space
+# Use `foo(bar)` not `foo( bar )`
+Layout/SpaceInsideParens:
+  Enabled: true
+# Use `%w[ foo ]` not `%w[foo]`
+Layout/SpaceInsidePercentLiteralDelimiters:
+  Enabled: true
+# Use `hash[:key]` not `hash[ :key ]`
+Layout/SpaceInsideReferenceBrackets:
+  Enabled: true
+
+Layout/ArgumentAlignment:
+  Enabled: true
+  EnforcedStyle: with_fixed_indentation
+Layout/ArrayAlignment:
+  Enabled: true
+  EnforcedStyle: with_fixed_indentation
+Layout/ParameterAlignment:
+  Enabled: true
+  EnforcedStyle: with_fixed_indentation
+Layout/ElseAlignment:
+  Enabled: true
+Layout/EndAlignment:
+  Enabled: true
+  EnforcedStyleAlignWith: variable
+
+Layout/CaseIndentation:
+  Enabled: true
+  EnforcedStyle: end
+# Align comments with method definitions.
+Layout/CommentIndentation:
+  Enabled: true
+
+# Remove all mandatory midline alignment.
+#
+# There is no noted upside which comes close to justifying additional effort to
+# align elements. As there is no improvement in readability (the tradeoff is
+# even upside/downside), the only advantage would be the cases where it
+# improves aesthetics.
+Layout/FirstHashElementIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
+Layout/LineEndStringConcatenationIndentation:
+  Enabled: true
+  EnforcedStyle: indented
+Layout/MultilineMethodCallIndentation:
+  Enabled: true
+  EnforcedStyle: indented
+Layout/MultilineOperationIndentation:
+  Enabled: true
+  EnforcedStyle: indented
+
+Rspec/MultipleExpectations:
+  Enabled: false
