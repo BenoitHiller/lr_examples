@@ -1,53 +1,39 @@
-require 'amazing_print'
-
 module LrExamples
   class Lr0
-    attr_reader :tokens, :next, :reduce
+    attr_reader :tokens, :items, :next, :reduce
 
     def initialize(productions)
       #####################
       # Initialize Tokens #
       #####################
 
-      @tokens = BiHash.new
-
+      # Compute which are non-terminals first as the only thing that
+      # distinguishes the two is whether or not the token appears on
+      # the left-hand-side of a production.
+      non_terminals = {}
       productions.each do |left, _|
-        unless @tokens.include?(left)
-          @tokens[left] = @tokens.length
+        unless non_terminals.include?(left)
+          non_terminals[left] = non_terminals.length + 1
         end
       end
 
-      non_terminals_count = @tokens.length
+      @tokens = BiHash.new
 
-      # We compute the non_terminals first, as we can't know which is
-      # which except by checking the LHS of our productions. However
-      # it is a bit less awkward having the terminals as the lower
-      # numbers.
-      #
-      # In practice if you have a lexer you have already given the
-      # terminals ids by the time you are generating the parser, and
-      # will probably be making use of those or something derived from
-      # those.
-      offset = -1
+      @tokens['$'] = 1
       productions.each do |_, right|
         right.each do |token|
-          unless @tokens.include?(token)
-            @tokens[token] = offset
-            offset -= 1
+          unless non_terminals.include?(token) ||
+              @tokens.include?(token)
+
+            @tokens[token] = @tokens.length + 1
           end
         end
       end
 
-      @terminals_count = @tokens.length - non_terminals_count
-
-      @tokens.transform_values! do |value|
-        value + @terminals_count
+      @terminals_count = @tokens.length
+      non_terminals.each do |token, index|
+        @tokens[token] = @terminals_count + index
       end
-
-      # Swap EOF into the 0 position for consistency
-      first_terminal = @tokens.inverted[0]
-      @tokens['$'], @tokens[first_terminal] =
-        @tokens[first_terminal], @tokens['$']
 
       ####################
       # Initialize Items #
@@ -133,7 +119,27 @@ module LrExamples
     end
 
     def states
-      @table_states.inverted
+      (0...@table_states.length).map do |i|
+        {
+          reduce: @reduce[i],
+          next: @next[i].map do |token, state|
+            [@tokens.inverted[token], state]
+          end.to_h,
+          items: @table_states.inverted[i].map do |item|
+            item_string(item)
+          end
+        }
+      end
+    end
+
+    def terminals
+      @terminals ||= (1..@terminals_count).to_set
+    end
+
+    def non_terminals
+      @non_terminals ||= ((@terminals_count + 1)...@tokens.length).to_set
+    end
+
     end
 
     protected
@@ -182,6 +188,49 @@ module LrExamples
       end
 
       result
+    end
+
+    def item_string(current)
+      production = item_production(current)
+      output = "#{token_string(@production_tokens[production])} ->"
+      production_items(production).each do |item|
+        token = @items[item]
+        if item == current
+          output += " ."
+        end
+        output += " "
+        output += token_string(token)
+      end
+
+      if @items[current] <= 0
+        output += " ."
+      end
+
+      output
+    end
+
+    def item_production(i)
+      while @items[i] > 0
+        i += 1
+      end
+
+      -@items[i]
+    end
+
+    def token_string(i)
+      token = @tokens.inverted[i]
+      case token
+      when Symbol
+        token.to_s
+      when String
+        token.dump.gsub('"', "'")
+      end
+    end
+
+    def production_items(production)
+      first = @initial_items[production]
+      last = @initial_items[production + 1] || @items.length
+      first...(last - 1)
     end
   end
 end

@@ -7,6 +7,17 @@ module Grammars
     A <= []
   end
 
+  class G3 < Productions
+    S <= [E, "$"]
+
+    E <= [E, "+", B]
+    E <= [E, "*", B]
+    E <= B
+
+    B <= "0"
+    B <= "1"
+  end
+
   class G4 < Productions
     S <= [A, "$"]
 
