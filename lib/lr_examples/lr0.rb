@@ -140,6 +140,67 @@ module LrExamples
       @non_terminals ||= ((@terminals_count + 1)...@tokens.length).to_set
     end
 
+    def nullable_tokens
+      @nullable_tokens ||= begin
+        nullable = Set.new
+
+        # The set of non_terminals on the right hand side of each
+        # production. As the algorithm proceeds we will prune the
+        # nullable tokens as we find them until it the set is empty at
+        # which point we know the production is nullable.
+        production_tokens = Hash.new { |h, k| h[k] = Set.new }
+
+        # This is the inverse mapping for the initial value of
+        # production_tokens
+        has_token = Hash.new { |h, k| h[k] = Set.new }
+
+        @production_tokens.each do |production, left|
+          tokens = production_items(production).map do |item|
+            @items[item]
+          end.to_set
+
+          if tokens.empty?
+            nullable.add(left)
+          else
+            if (tokens & terminals).empty?
+              production_tokens[production] = tokens
+
+              tokens.each do |token|
+                has_token[token].add(production)
+              end
+            end
+          end
+        end
+
+        queue = nullable.to_a
+
+        # For each nullable token there must exist a parse tree with
+        # that token at the root such that every node in the tree is
+        # also a nullable token.
+        #
+        # The implication of that is that we can enumerate all such
+        # tokens by iteratively computing all of the tokens that can
+        # be generated with a tree of each depth. That is accomplished
+        # here by processing them in FIFO order as we find them.
+        until queue.empty?
+          token = queue.shift()
+
+          has_token[token].each do |production|
+            left_token = @production_tokens[production]
+
+            unless nullable.include?(left_token)
+              production_tokens[production].delete(token)
+
+              if production_tokens[production].empty?
+                nullable.add(left_token)
+                queue.push(left_token)
+              end
+            end
+          end
+        end
+
+        nullable
+      end
     end
 
     protected

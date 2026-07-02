@@ -100,4 +100,18 @@ RSpec.describe LrExamples::Lr0 do
       expect(parser.states).to eq(EXPECTED_STATES)
     end
   end
+
+  context 'with Grammar 4' do
+    let(:grammar) { Grammars::G4 }
+
+    it 'computes the nullable tokens' do
+      token_ids = parser.nullable_tokens
+
+      tokens = token_ids.map do |id|
+        parser.tokens.inverted[id]
+      end.to_set
+
+      expect(tokens).to eq(Set[:B, :C, :D])
+    end
+  end
 end
