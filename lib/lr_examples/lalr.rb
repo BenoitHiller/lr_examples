@@ -179,5 +179,20 @@ module LrExamples
 
       lookahead
     end
+
+    memoized_method :reduce do
+      reduce = Hash.of { Hash.of(Set) }
+
+      lookahead.each do |edge, tokens|
+        edge => Edge[state, production]
+        if @lr0.reduce[state].include?(production)
+          tokens.each do |token|
+            reduce[state][token].add(production)
+          end
+        end
+      end
+
+      reduce
+    end
   end
 end

@@ -88,12 +88,26 @@ RSpec.describe LrExamples::Lalr do
       }
     end
 
+    let(:expected_reduce) do
+      {
+        2 => { tokens["$"] => Set[3] },
+        3 => { tokens["$"] => Set[2] },
+        5 => { tokens["$"] => Set[1] },
+        7 => { tokens["$"] => Set[4] },
+        9 => { tokens["$"] => Set[5] }
+      }
+    end
+
     it 'computes reads' do
       expect(parser.reads).to eq(expected_reads)
     end
 
     it 'computes the lookahead sets' do
       expect(parser.lookahead).to eq(expected_lookahead)
+    end
+
+    it 'computes reduce' do
+      expect(parser.reduce).to eq(expected_reduce)
     end
   end
 end
