@@ -1,6 +1,9 @@
 module LrExamples
   class Lr0
-    attr_reader :tokens, :items, :next, :reduce
+    using CoreExtensions
+
+    include Memoized
+    attr_reader :tokens, :items, :next, :reduce, :productions_for
 
     def initialize(productions)
       #####################
@@ -43,7 +46,7 @@ module LrExamples
       @initial_items = {}
 
       # At the same time we can fill in some data about productions
-      @productions_for = Hash.new { |h, k| h[k] = Set.new }
+      @productions_for = Hash.of(Set)
       @production_tokens = {}
 
       productions.each_with_index do |(left, right), i|
@@ -69,7 +72,7 @@ module LrExamples
 
       # Initialize @next to a hash that initializes any missing keys
       # to a new nested hash when you attempt to access them.
-      @next = Hash.new { |h, k| h[k] = {} }
+      @next = Hash.of(Hash)
 
       i = 0
       while i < @table_states.length
@@ -102,7 +105,7 @@ module LrExamples
 
       # Initialize @reduce to a hash that initializes any missing keys
       # to an empty set when you attempt to access them.
-      @reduce = Hash.new { |h, k| h[k] = Set.new }
+      @reduce = Hash.of(Set)
 
       @table_states.each do |table, i|
         table.each do |item|
@@ -132,75 +135,83 @@ module LrExamples
       end
     end
 
-    def terminals
-      @terminals ||= (1..@terminals_count).to_set
+    memoized_method :terminals do
+      (1..@terminals_count).to_set
     end
 
-    def non_terminals
-      @non_terminals ||= ((@terminals_count + 1)...@tokens.length).to_set
+    memoized_method :non_terminals do
+      ((@terminals_count + 1)..@tokens.length).to_set
     end
 
-    def nullable_tokens
-      @nullable_tokens ||= begin
-        nullable = Set.new
+    memoized_method :nullable_tokens do
+      nullable = Set.new
 
-        # The set of non_terminals on the right hand side of each
-        # production. As the algorithm proceeds we will prune the
-        # nullable tokens as we find them until it the set is empty at
-        # which point we know the production is nullable.
-        production_tokens = Hash.new { |h, k| h[k] = Set.new }
+      # The set of non_terminals on the right hand side of each
+      # production. As the algorithm proceeds we will prune the
+      # nullable tokens as we find them until it the set is empty at
+      # which point we know the production is nullable.
+      production_tokens = Hash.new { |h, k| h[k] = Set.new }
 
-        # This is the inverse mapping for the initial value of
-        # production_tokens
-        has_token = Hash.new { |h, k| h[k] = Set.new }
+      # This is the inverse mapping for the initial value of
+      # production_tokens
+      has_token = Hash.new { |h, k| h[k] = Set.new }
 
-        @production_tokens.each do |production, left|
-          tokens = production_items(production).map do |item|
-            @items[item]
-          end.to_set
+      @production_tokens.each do |production, left|
+        tokens = production_items(production).map do |item|
+          @items[item]
+        end.to_set
 
-          if tokens.empty?
-            nullable.add(left)
-          else
-            if (tokens & terminals).empty?
-              production_tokens[production] = tokens
+        if tokens.empty?
+          nullable.add(left)
+        else
+          if (tokens & terminals).empty?
+            production_tokens[production] = tokens
 
-              tokens.each do |token|
-                has_token[token].add(production)
-              end
+            tokens.each do |token|
+              has_token[token].add(production)
             end
           end
         end
-
-        queue = nullable.to_a
-
-        # For each nullable token there must exist a parse tree with
-        # that token at the root such that every node in the tree is
-        # also a nullable token.
-        #
-        # The implication of that is that we can enumerate all such
-        # tokens by iteratively computing all of the tokens that can
-        # be generated with a tree of each depth. That is accomplished
-        # here by processing them in FIFO order as we find them.
-        until queue.empty?
-          token = queue.shift()
-
-          has_token[token].each do |production|
-            left_token = @production_tokens[production]
-
-            unless nullable.include?(left_token)
-              production_tokens[production].delete(token)
-
-              if production_tokens[production].empty?
-                nullable.add(left_token)
-                queue.push(left_token)
-              end
-            end
-          end
-        end
-
-        nullable
       end
+
+      queue = nullable.to_a
+
+      # For each nullable token there must exist a parse tree with
+      # that token at the root such that every node in the tree is
+      # also a nullable token.
+      #
+      # The implication of that is that we can enumerate all such
+      # tokens by iteratively computing all of the tokens that can
+      # be generated with a tree of each depth. That is accomplished
+      # here by processing them in FIFO order as we find them.
+      until queue.empty?
+        token = queue.shift()
+
+        has_token[token].each do |production|
+          left_token = @production_tokens[production]
+
+          unless nullable.include?(left_token)
+            production_tokens[production].delete(token)
+
+            if production_tokens[production].empty?
+              nullable.add(left_token)
+              queue.push(left_token)
+            end
+          end
+        end
+      end
+
+      nullable
+    end
+
+    def productions
+      @production_tokens.map do |id, left|
+        [id, left, production_items.map(&@items)]
+      end
+    end
+
+    def tokens_for(production)
+      production_items(production).map(&@items)
     end
 
     protected

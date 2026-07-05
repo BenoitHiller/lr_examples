@@ -28,5 +28,24 @@ module Grammars
     C <= []
     D <= []
   end
+
+  class G5 < Productions
+    S <= [A, "$"]
+    A <= ["b", B]
+    A <= "a"
+
+    B <= ["c", C]
+    C <= ["d", A]
+  end
+
+  class G5B < Productions
+    S <= [A, "$"]
+    A <= ["b", B]
+    A <= "a"
+    A <= "b"
+
+    B <= ["c", C]
+    C <= ["d", A]
+  end
 end
 # rubocop:enable Lint/Void
