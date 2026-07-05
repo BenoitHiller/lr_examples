@@ -2,32 +2,14 @@ require 'forwardable'
 require_relative 'digraph'
 
 module LrExamples
-  class Lalr
-    extend Forwardable
+  class Lalr < Lr0
     include Digraph
-    include Memoized
     using CoreExtensions
 
     Edge = Data.define(:from, :label) do
       def format(parser)
         "[#{from}, #{parser.tokens.inverted[label]}]"
       end
-    end
-    def_delegators(
-      :@lr0,
-
-      :tokens,
-      :items,
-      :nullable_tokens,
-      :terminals,
-      :non_terminals,
-      :productions_for,
-      :tokens_for,
-      :states
-    )
-
-    def initialize(productions)
-      @lr0 = Lr0.new(productions)
     end
 
     memoized_method :direct_reads do
@@ -36,7 +18,7 @@ module LrExamples
       transitions.each do |edge, next_state|
         if non_terminals.include?(edge.label)
           direct_reads[edge] =
-            @lr0.next[next_state].keys.filter do |token|
+            next0[next_state].keys.filter do |token|
               terminals.include?(token)
             end.to_set
         end
@@ -53,7 +35,7 @@ module LrExamples
       transitions.each do |edge, next_state|
         if non_terminals.include?(edge.label)
 
-          @lr0.next[next_state].keys.each do |next_token|
+          next0[next_state].keys.each do |next_token|
             if nullable_tokens.include?(next_token)
               reads[edge].add(Edge[next_state, next_token])
             end
@@ -69,7 +51,7 @@ module LrExamples
     end
 
     memoized_method :transitions do
-      @lr0.next.flat_map do |start_state, state_transitions|
+      next0.flat_map do |start_state, state_transitions|
         state_transitions.map do |token, next_state|
           [Edge[start_state, token], next_state]
         end
@@ -171,7 +153,6 @@ module LrExamples
       lookahead = Hash.of(Set)
 
       lookback_relation.each do |from_edge, to_edges|
-
         to_edges.each do |edge|
           lookahead[from_edge] += follow[edge]
         end
@@ -185,7 +166,7 @@ module LrExamples
 
       lookahead.each do |edge, tokens|
         edge => Edge[state, production]
-        if @lr0.reduce[state].include?(production)
+        if reduce0[state].include?(production)
           tokens.each do |token|
             reduce[state][token].add(production)
           end

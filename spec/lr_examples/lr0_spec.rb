@@ -1,6 +1,6 @@
 EXPECTED_STATES = [
   {
-    reduce: Set[],
+    reduce0: Set[],
     items: [
       "S -> . E '$'",
       "E -> . E '+' B",
@@ -9,84 +9,84 @@ EXPECTED_STATES = [
       "B -> . '0'",
       "B -> . '1'"
     ],
-    next: {
+    next0: {
       '0' => 3,
       '1' => 4,
       E: 1,
       B: 2
     }
   }, {
-    reduce: Set[],
+    reduce0: Set[],
     items: [
       "S -> E . '$'",
       "E -> E . '+' B",
       "E -> E . '*' B"
     ],
-    next: {
+    next0: {
       '$' => 5,
       '+' => 6,
       '*' => 7
     }
   }, {
-    reduce: Set[3],
+    reduce0: Set[3],
     items: [
       "E -> B ."
     ],
-    next: {}
+    next0: {}
   }, {
-    reduce: Set[4],
+    reduce0: Set[4],
     items: [
       "B -> '0' ."
     ],
-    next: {}
+    next0: {}
   }, {
-    reduce: Set[5],
+    reduce0: Set[5],
     items: [
       "B -> '1' ."
     ],
-    next: {}
+    next0: {}
   }, {
-    reduce: Set[],
+    reduce0: Set[],
     items: [
       "S -> E '$' ."
     ],
-    next: {}
+    next0: {}
   }, {
-    reduce: Set[],
+    reduce0: Set[],
     items: [
       "E -> E '+' . B",
       "B -> . '0'",
       "B -> . '1'"
     ],
-    next: {
+    next0: {
       '0' => 3,
       '1' => 4,
       B: 8
     }
   }, {
-    reduce: Set[],
+    reduce0: Set[],
     items: [
       "E -> E '*' . B",
       "B -> . '0'",
       "B -> . '1'"
     ],
-    next: {
+    next0: {
       '0' => 3,
       '1' => 4,
       B: 9
     }
   }, {
-    reduce: Set[1],
+    reduce0: Set[1],
     items: [
       "E -> E '+' B ."
     ],
-    next: {}
+    next0: {}
   }, {
-    reduce: Set[2],
+    reduce0: Set[2],
     items: [
       "E -> E '*' B ."
     ],
-    next: {}
+    next0: {}
   }
 ]
 

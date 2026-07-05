@@ -1,9 +1,9 @@
 module LrExamples
   class Lr0
     using CoreExtensions
-
     include Memoized
-    attr_reader :tokens, :items, :next, :reduce, :productions_for
+
+    attr_reader :tokens, :items, :next0, :reduce0, :productions_for
 
     def initialize(productions)
       #####################
@@ -70,9 +70,9 @@ module LrExamples
       # item 0, the start item.
       @table_states[closure(Set[0])] = 0
 
-      # Initialize @next to a hash that initializes any missing keys
+      # Initialize @next0 to a hash that initializes any missing keys
       # to a new nested hash when you attempt to access them.
-      @next = Hash.of(Hash)
+      @next0 = Hash.of(Hash)
 
       i = 0
       while i < @table_states.length
@@ -89,23 +89,23 @@ module LrExamples
 
           # The only terribly smart thing we have to do in this whole
           # process is checking to see if the generated item set
-          # already exists, and if so simply put in a @next entry
+          # already exists, and if so simply put in a @next0 entry
           # pointing to it.
           if @table_states.key?(new_table)
-            @next[i][token] = @table_states[new_table]
+            @next0[i][token] = @table_states[new_table]
           else
             id = @table_states.length
             @table_states[new_table] = id
-            @next[i][token] = id
+            @next0[i][token] = id
           end
         end
 
         i += 1
       end
 
-      # Initialize @reduce to a hash that initializes any missing keys
-      # to an empty set when you attempt to access them.
-      @reduce = Hash.of(Set)
+      # Initialize @reduce0 to a hash that initializes any missing
+      # keys to an empty set when you attempt to access them.
+      @reduce0 = Hash.of(Set)
 
       @table_states.each do |table, i|
         table.each do |item|
@@ -115,7 +115,7 @@ module LrExamples
           # result in a reduction in a state just by looking for the
           # negative tokens
           if token < 0
-            @reduce[i].add(-token)
+            @reduce0[i].add(-token)
           end
         end
       end
@@ -124,8 +124,8 @@ module LrExamples
     def states
       (0...@table_states.length).map do |i|
         {
-          reduce: @reduce[i],
-          next: @next[i].map do |token, state|
+          reduce0: @reduce0[i],
+          next0: @next0[i].map do |token, state|
             [@tokens.inverted[token], state]
           end.to_h,
           items: @table_states.inverted[i].map do |item|
