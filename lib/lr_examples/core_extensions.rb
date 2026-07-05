@@ -1,7 +1,7 @@
 module LrExamples
   module CoreExtensions
     refine Hash.singleton_class do
-      def of(klass = nil, &block)
+      def with_default(klass = nil, &block)
         if block
           self.new { |h, k| h[k] = block.call }
         elsif klass

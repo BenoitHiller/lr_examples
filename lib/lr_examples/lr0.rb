@@ -46,7 +46,7 @@ module LrExamples
       @initial_items = {}
 
       # At the same time we can fill in some data about productions
-      @productions_for = Hash.of(Set)
+      @productions_for = Hash.with_default(Set)
       @production_tokens = {}
 
       productions.each_with_index do |(left, right), i|
@@ -72,7 +72,7 @@ module LrExamples
 
       # Initialize @next0 to a hash that initializes any missing keys
       # to a new nested hash when you attempt to access them.
-      @next0 = Hash.of(Hash)
+      @next0 = Hash.with_default(Hash)
 
       i = 0
       while i < @table_states.length
@@ -105,7 +105,7 @@ module LrExamples
 
       # Initialize @reduce0 to a hash that initializes any missing
       # keys to an empty set when you attempt to access them.
-      @reduce0 = Hash.of(Set)
+      @reduce0 = Hash.with_default(Set)
 
       @table_states.each do |table, i|
         table.each do |item|

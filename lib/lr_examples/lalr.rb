@@ -13,7 +13,7 @@ module LrExamples
     end
 
     memoized def direct_reads
-      direct_reads = Hash.of(Set)
+      direct_reads = Hash.with_default(Set)
 
       transitions.each do |edge, next_state|
         if non_terminals.include?(edge.label)
@@ -30,7 +30,7 @@ module LrExamples
     memoized def reads_relation
       # Note that it is important that the reads_relation returns an
       # empty value and not nil for undefined edges.
-      reads = Hash.of(Set)
+      reads = Hash.with_default(Set)
 
       transitions.each do |edge, next_state|
         if non_terminals.include?(edge.label)
@@ -65,7 +65,7 @@ module LrExamples
     end
 
     memoized def accessing_edges
-      accessing_edges = Hash.of(Set)
+      accessing_edges = Hash.with_default(Set)
 
       transitions.each do |edge, state|
         accessing_edges[state].add(edge)
@@ -78,8 +78,8 @@ module LrExamples
     # at the same time because they both involve the same traversal of
     # paths defined by the tokens in some production.
     def compute_path_relations
-      @lookback_relation = Hash.of(Set)
-      @includes_relation = Hash.of(Set)
+      @lookback_relation = Hash.with_default(Set)
+      @includes_relation = Hash.with_default(Set)
 
       non_terminal_transitions.each do |edge, _|
         productions_for[edge.label].each do |production|
@@ -150,7 +150,7 @@ module LrExamples
     end
 
     memoized def lookahead
-      lookahead = Hash.of(Set)
+      lookahead = Hash.with_default(Set)
 
       lookback_relation.each do |from_edge, to_edges|
         to_edges.each do |edge|
@@ -162,7 +162,7 @@ module LrExamples
     end
 
     memoized def reduce
-      reduce = Hash.of { Hash.of(Set) }
+      reduce = Hash.with_default { Hash.with_default(Set) }
 
       lookahead.each do |edge, tokens|
         edge => Edge[state, production]
