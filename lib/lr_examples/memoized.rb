@@ -1,17 +1,16 @@
 module LrExamples
   module Memoized
     module ClassMethods
-      def memoized_method(name, &block)
-        if block.arity > 0
-          raise Error.new(
-            "memoizing methods with arguments is not yet supported"
-          )
-        end
+      def memoized(name)
+        inner_method = instance_method(name)
         cache_name = :"@memo__#{name}"
 
         define_method(name) do
           unless instance_variable_defined?(cache_name)
-            instance_variable_set(cache_name, instance_eval(&block))
+            instance_variable_set(
+              cache_name,
+              inner_method.bind_call(self)
+            )
           end
 
           instance_variable_get(cache_name)

@@ -135,15 +135,15 @@ module LrExamples
       end
     end
 
-    memoized_method :terminals do
+    memoized def terminals
       (1..@terminals_count).to_set
     end
 
-    memoized_method :non_terminals do
+    memoized def non_terminals
       ((@terminals_count + 1)..@tokens.length).to_set
     end
 
-    memoized_method :nullable_tokens do
+    memoized def nullable_tokens
       nullable = Set.new
 
       # The set of non_terminals on the right hand side of each

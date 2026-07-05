@@ -12,7 +12,7 @@ module LrExamples
       end
     end
 
-    memoized_method :direct_reads do
+    memoized def direct_reads
       direct_reads = Hash.of(Set)
 
       transitions.each do |edge, next_state|
@@ -27,7 +27,7 @@ module LrExamples
       direct_reads
     end
 
-    memoized_method :reads_relation do
+    memoized def reads_relation
       # Note that it is important that the reads_relation returns an
       # empty value and not nil for undefined edges.
       reads = Hash.of(Set)
@@ -46,11 +46,11 @@ module LrExamples
       reads
     end
 
-    memoized_method :reads do
+    memoized def reads
       digraph(reads_relation, transitions.keys, &direct_reads)
     end
 
-    memoized_method :transitions do
+    memoized def transitions
       next0.flat_map do |start_state, state_transitions|
         state_transitions.map do |token, next_state|
           [Edge[start_state, token], next_state]
@@ -58,13 +58,13 @@ module LrExamples
       end.to_h
     end
 
-    memoized_method :non_terminal_transitions do
+    memoized def non_terminal_transitions
       transitions.filter do |edge, _|
         non_terminals.include?(edge.label)
       end
     end
 
-    memoized_method :accessing_edges do
+    memoized def accessing_edges
       accessing_edges = Hash.of(Set)
 
       transitions.each do |edge, state|
@@ -141,7 +141,7 @@ module LrExamples
       @lookback_relation
     end
 
-    memoized_method :follow do
+    memoized def follow
       digraph(
         includes_relation,
         non_terminal_transitions.keys,
@@ -149,7 +149,7 @@ module LrExamples
       )
     end
 
-    memoized_method :lookahead do
+    memoized def lookahead
       lookahead = Hash.of(Set)
 
       lookback_relation.each do |from_edge, to_edges|
@@ -161,7 +161,7 @@ module LrExamples
       lookahead
     end
 
-    memoized_method :reduce do
+    memoized def reduce
       reduce = Hash.of { Hash.of(Set) }
 
       lookahead.each do |edge, tokens|
