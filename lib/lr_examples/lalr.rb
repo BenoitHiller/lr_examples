@@ -16,11 +16,8 @@ module LrExamples
       direct_reads = Hash.with_default(Set)
 
       transitions.each do |edge, next_state|
-        if non_terminals.include?(edge.label)
-          direct_reads[edge] =
-            next0[next_state].keys.filter do |token|
-              terminals.include?(token)
-            end.to_set
+        if edge.label in ^(non_terminals)
+          direct_reads[edge] = terminals & next0[next_state].keys
         end
       end
 
@@ -33,10 +30,10 @@ module LrExamples
       reads = Hash.with_default(Set)
 
       transitions.each do |edge, next_state|
-        if non_terminals.include?(edge.label)
+        if edge.label in ^(non_terminals)
 
           next0[next_state].keys.each do |next_token|
-            if nullable_tokens.include?(next_token)
+            if next_token in ^(nullable_tokens)
               reads[edge].add(Edge[next_state, next_token])
             end
           end
@@ -60,7 +57,7 @@ module LrExamples
 
     memoized def non_terminal_transitions
       transitions.filter do |edge, _|
-        non_terminals.include?(edge.label)
+        edge.label in ^(non_terminals)
       end
     end
 
@@ -104,8 +101,8 @@ module LrExamples
             # the nullable non-terminals at the end of the path, and
             # at most one non-nullable non-terminal that immediately
             # proceeds those.
-            if non_terminals.include?(token)
-              unless nullable_tokens.include?(token)
+            if token in ^(non_terminals)
+              unless token in ^(nullable_tokens)
                 included.clear
               end
 
@@ -166,7 +163,7 @@ module LrExamples
 
       lookahead.each do |edge, tokens|
         edge => Edge[state, production]
-        if reduce0[state].include?(production)
+        if production in ^(reduce0[state])
           tokens.each do |token|
             reduce[state][token].add(production)
           end

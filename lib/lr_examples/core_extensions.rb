@@ -13,6 +13,12 @@ module LrExamples
       end
     end
 
+    refine Hash do
+      def ===(other)
+        include?(other) || super
+      end
+    end
+
     refine Array do
       def to_proc
         array = self

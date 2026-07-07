@@ -15,6 +15,7 @@ module LrExamples
         end
       end
     end
+
     using InverseRefinements
 
     class InverseHash
@@ -93,6 +94,10 @@ module LrExamples
       end
 
       self
+    end
+
+    def ===(other)
+      include?(other) || super
     end
 
     def length
