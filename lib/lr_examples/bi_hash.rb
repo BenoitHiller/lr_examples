@@ -47,6 +47,10 @@ module LrExamples
         inverted.each(true).map { |key, value| [key.inverted, value] }.each(&block)
       end
 
+      def keys
+        map(&:first)
+      end
+
       def length
         inverted.length
       end
@@ -88,6 +92,10 @@ module LrExamples
       @data.filter { |key, _| key.is_a?(Inverted) == inverted }.each(&block)
     end
 
+    def keys
+      map(&:first)
+    end
+
     def transform_values!(&block)
       each do |key, value|
         self[key] = block[value]
@@ -102,6 +110,27 @@ module LrExamples
 
     def length
       @data.length / 2
+    end
+
+    def report_print(rp)
+      rp.inline do
+        rp.write_header(self, write_id: false)
+        rp.inline(" ") do
+          rp.write("{")
+          rp.write_object_id(self)
+        end
+      end
+      rp.multiline(after: "}", separator: ",") do
+        each do |key, value|
+          rp.inline do
+            rp.rp(key)
+            rp.inline(" ") do
+              rp.write("<=>")
+              rp.rp(value)
+            end
+          end
+        end
+      end
     end
   end
 end

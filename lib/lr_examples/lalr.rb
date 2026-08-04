@@ -1,4 +1,3 @@
-require 'forwardable'
 require_relative 'digraph'
 
 module LrExamples

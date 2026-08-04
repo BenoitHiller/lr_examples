@@ -11,3 +11,5 @@ gem "rspec", "~> 3.0"
 gem "rubocop", "~> 1.21"
 
 gem "amazing_print", "~> 2.0"
+
+gem "report_print", "~> 0.2"

@@ -1,4 +1,5 @@
 require 'amazing_print'
+require 'report_print'
 
 require_relative "lr_examples/version"
 require_relative "lr_examples/core_extensions"

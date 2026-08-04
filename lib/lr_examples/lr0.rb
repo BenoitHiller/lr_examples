@@ -213,6 +213,66 @@ module LrExamples
       production_items(production).map(&@items)
     end
 
+    def report_print(rp)
+      rp.write_header(self)
+      rp.multiline do
+        rp.write_instance_variables(self, [:@tokens])
+
+        rp.inline do
+          rp.write("States", color: :bright_cyan)
+          rp.multiline(
+            after: rp.color("end", :bright_blue),
+            separator: "\n"
+          ) do
+            @table_states.each do |items, state|
+              rp.inline(" ") do
+                rp.write("state")
+                rp.rp(state)
+              end
+              rp.multiline do
+                items.each do |current|
+                  rp.inline(" ") do
+                    rp.write("[")
+                    production = item_production(current)
+                    rp.rp(
+                      @tokens.inverted[@production_tokens[production]]
+                    )
+                    rp.write("->")
+                    production_items(production).each do |item|
+                      token = @items[item]
+                      if item == current
+                        rp.write(".")
+                      end
+                      rp.rp(tokens.inverted[token])
+                    end
+                    if @items[current] <= 0
+                      rp.write(".")
+                    end
+
+                    rp.write("]")
+
+                    next_state = @next0.dig(state, @items[current])
+
+                    if !next_state.nil?
+                      rp.write("shift")
+                      rp.rp(@tokens.inverted[@items[current]])
+                      rp.write("to")
+                      rp.rp(next_state)
+                    elsif !@reduce0[state].empty?
+                      rp.write("reduce")
+                    else
+                      rp.write("accept")
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+      rp.write("end", color: :bright_blue)
+    end
+
     protected
 
     def successors(item_set)
