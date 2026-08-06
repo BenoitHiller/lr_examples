@@ -15,7 +15,7 @@ module LrExamples
       # the left-hand-side of a production.
       non_terminals = {}
       productions.each do |left, _|
-        unless left in ^non_terminals
+        unless non_terminals.include?(left)
           non_terminals[left] = non_terminals.length + 1
         end
       end
@@ -25,7 +25,8 @@ module LrExamples
       @tokens['$'] = 1
       productions.each do |_, right|
         right.each do |token|
-          unless token in ^non_terminals | ^@tokens
+          unless non_terminals.include?(token) ||
+              @tokens.include?(token)
 
             @tokens[token] = @tokens.length + 1
           end
@@ -90,7 +91,7 @@ module LrExamples
           # process is checking to see if the generated item set
           # already exists, and if so simply put in a @next0 entry
           # pointing to it.
-          if new_table in ^@table_states
+          if @table_states.key?(new_table)
             @next0[i][token] = @table_states[new_table]
           else
             id = @table_states.length
@@ -189,7 +190,7 @@ module LrExamples
         has_token[token].each do |production|
           left_token = @production_tokens[production]
 
-          unless left_token in ^nullable
+          unless nullable.include?(left_token)
             production_dependencies[production].delete(token)
 
             if production_dependencies[production].empty?
