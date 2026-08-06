@@ -49,7 +49,7 @@ module LrExamples
       @productions_for = Hash.with_default(Set)
       @production_tokens = {}
 
-      productions.each_with_index do |(left, right), i|
+      productions.each_with_index { |(left, right), i|
         left_token = @tokens[left]
         @productions_for[left_token].add(i)
         @production_tokens[i] = left_token
@@ -59,7 +59,7 @@ module LrExamples
           @items << @tokens[token]
         end
         @items << -i
-      end
+      }
 
       ##################
       # Compute Tables #
@@ -122,17 +122,17 @@ module LrExamples
     end
 
     def states
-      (0...@table_states.length).map do |i|
+      (0...@table_states.length).map { |i|
         {
           reduce0: @reduce0[i],
-          next0: @next0[i].map do |token, state|
+          next0: @next0[i].map { |token, state|
             [@tokens.inverted[token], state]
-          end.to_h,
-          items: @table_states.inverted[i].map do |item|
+          }.to_h,
+          items: @table_states.inverted[i].map { |item|
             item_string(item)
-          end
+          }
         }
-      end
+      }
     end
 
     memoized def terminals
@@ -157,9 +157,9 @@ module LrExamples
       has_token = Hash.new { |h, k| h[k] = Set.new }
 
       for production, left in @production_tokens do
-        tokens = production_items(production).map do |item|
+        tokens = production_items(production).map { |item|
           @items[item]
-        end.to_set
+        }.to_set
 
         if tokens.empty?
           nullable.add(left)
@@ -205,9 +205,9 @@ module LrExamples
     end
 
     def productions
-      @production_tokens.map do |id, left|
+      @production_tokens.map { |id, left|
         [id, left, production_items.map(&@items)]
-      end
+      }
     end
 
     def tokens_for(production)
@@ -216,23 +216,23 @@ module LrExamples
 
     def report_print(rp)
       rp.write_header(self)
-      rp.multiline do
+      rp.multiline {
         rp.write_instance_variables(self, [:@tokens])
 
-        rp.inline do
+        rp.inline {
           rp.write("States", color: :bright_cyan)
           rp.multiline(
             after: rp.color("end", :bright_blue),
             separator: "\n"
-          ) do
+          ) {
             for items, state in @table_states do
-              rp.inline(" ") do
+              rp.inline(" ") {
                 rp.write("state")
                 rp.rp(state)
-              end
-              rp.multiline do
+              }
+              rp.multiline {
                 for current in items do
-                  rp.inline(" ") do
+                  rp.inline(" ") {
                     rp.write("[")
                     production = item_production(current)
                     rp.rp(
@@ -264,34 +264,34 @@ module LrExamples
                     else
                       rp.write("accept")
                     end
-                  end
+                  }
                 end
-              end
+              }
             end
-          end
-        end
-      end
+          }
+        }
+      }
       rp.write("end", color: :bright_blue)
     end
 
     protected
 
     def successors(item_set)
-      shifted_items = item_set.select do |item|
+      shifted_items = item_set.select { |item|
         # For each item that isn't the last item in its production.
         @items[item] > 0
-      end.map { |item|
+      }.map { |item|
         # Generate a shifted item
         item + 1
       }
 
-      shifted_items.group_by do |item|
+      shifted_items.group_by { |item|
         # Now we group the shifted items we generated based on the
         # id of the token that was shifted.
         @items[item - 1]
 
         # Then this converts the lists of grouped items into sets
-      end.transform_values { |array| array.to_set() }
+      }.transform_values { |array| array.to_set() }
     end
 
     def closure(item_set)
@@ -308,9 +308,9 @@ module LrExamples
           # Where @productions_for is assumed to map from token ids to
           # the set of production ids which have that token as their
           # left hand side.
-          token_items = @productions_for[token].map do |production|
+          token_items = @productions_for[token].map { |production|
             @initial_items[production]
-          end.to_set
+          }.to_set
 
           new_items = token_items - result
 

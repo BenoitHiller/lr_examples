@@ -4,6 +4,9 @@ plugins:
 
 AllCops:
   TargetRubyVersion: 4.0
+  Exclude:
+    - '*.gemspec'
+
 
 # Turn off everything by default then go back through
 Metrics:
@@ -100,6 +103,14 @@ Style/TrailingCommaInHashLiteral:
 Style/For:
   Enabled: true
   EnforcedStyle: for
+  Exclude:
+    - 'spec/**/*'
+
+Style/BlockDelimiters:
+  Enabled: true
+  EnforcedStyle: always_braces
+  Exclude:
+    - 'spec/**/*'
 
 # Method definitions after `private` or `protected` isolated calls need one
 # extra level of indentation.

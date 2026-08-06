@@ -11,13 +11,13 @@ module LrExamples
       # rubocop:disable Naming/BinaryOperatorParameterName
       def <=(tokens)
         tokens = Array(tokens)
-        values = tokens.map do |token|
+        values = tokens.map { |token|
           if token.is_a?(Token)
             token.token
           else
             token
           end
-        end
+        }
         @productions.define(@token, values)
       end
       # rubocop:enable Naming/BinaryOperatorParameterName

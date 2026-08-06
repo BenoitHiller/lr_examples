@@ -5,7 +5,7 @@ module LrExamples
         inner_method = instance_method(name)
         cache_name = :"@memo__#{name}"
 
-        define_method(name) do
+        define_method(name) {
           unless instance_variable_defined?(cache_name)
             instance_variable_set(
               cache_name,
@@ -14,7 +14,7 @@ module LrExamples
           end
 
           instance_variable_get(cache_name)
-        end
+        }
       end
     end
 

@@ -5,11 +5,11 @@ module LrExamples
     include Digraph
     using CoreExtensions
 
-    Edge = Data.define(:from, :label) do
+    Edge = Data.define(:from, :label) {
       def format(parser)
         "[#{from}, #{parser.tokens.inverted[label]}]"
       end
-    end
+    }
 
     memoized def direct_reads
       direct_reads = Hash.with_default(Set)
@@ -47,17 +47,17 @@ module LrExamples
     end
 
     memoized def transitions
-      next0.flat_map do |start_state, state_transitions|
-        state_transitions.map do |token, next_state|
+      next0.flat_map { |start_state, state_transitions|
+        state_transitions.map { |token, next_state|
           [Edge[start_state, token], next_state]
-        end
-      end.to_h
+        }
+      }.to_h
     end
 
     memoized def non_terminal_transitions
-      transitions.filter do |edge, _|
+      transitions.filter { |edge, _|
         non_terminals.include?(edge.label)
-      end
+      }
     end
 
     memoized def accessing_edges
