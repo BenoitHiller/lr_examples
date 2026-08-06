@@ -14,7 +14,7 @@ module LrExamples
       # distinguishes the two is whether or not the token appears on
       # the left-hand-side of a production.
       non_terminals = {}
-      productions.each do |left, _|
+      for left, _ in productions do
         unless non_terminals.include?(left)
           non_terminals[left] = non_terminals.length + 1
         end
@@ -23,8 +23,8 @@ module LrExamples
       @tokens = BiHash.new
 
       @tokens['$'] = 1
-      productions.each do |_, right|
-        right.each do |token|
+      for _, right in productions do
+        for token in right do
           unless non_terminals.include?(token) ||
               @tokens.include?(token)
 
@@ -34,7 +34,7 @@ module LrExamples
       end
 
       @terminals_count = @tokens.length
-      non_terminals.each do |token, index|
+      for token, index in non_terminals do
         @tokens[token] = @terminals_count + index
       end
 
@@ -55,7 +55,7 @@ module LrExamples
         @production_tokens[i] = left_token
 
         @initial_items[i] = @items.length
-        right.each do |token|
+        for token in right do
           @items << @tokens[token]
         end
         @items << -i
@@ -78,7 +78,7 @@ module LrExamples
       while i < @table_states.length
         table = @table_states.inverted[i]
 
-        successors(table).each do |token, new_table|
+        for token, new_table in successors(table) do
           # Skip generating the table that would shift the eof token,
           # as we accept the input instead of visiting that state.
           if token == 0
@@ -107,8 +107,8 @@ module LrExamples
       # keys to an empty set when you attempt to access them.
       @reduce0 = Hash.with_default(Set)
 
-      @table_states.each do |table, i|
-        table.each do |item|
+      for table, i in @table_states do
+        for item in table do
           token = @items[item]
           # This is where putting the -production ids in the @items
           # array starts to pay off. We can find all of the items that
@@ -156,7 +156,7 @@ module LrExamples
       # production_tokens
       has_token = Hash.new { |h, k| h[k] = Set.new }
 
-      @production_tokens.each do |production, left|
+      for production, left in @production_tokens do
         tokens = production_items(production).map do |item|
           @items[item]
         end.to_set
@@ -167,7 +167,7 @@ module LrExamples
           if (tokens & terminals).empty?
             production_dependencies[production] = tokens
 
-            tokens.each do |token|
+            for token in tokens do
               has_token[token].add(production)
             end
           end
@@ -187,7 +187,7 @@ module LrExamples
       until queue.empty?
         token = queue.shift()
 
-        has_token[token].each do |production|
+        for production in has_token[token] do
           left_token = @production_tokens[production]
 
           unless nullable.include?(left_token)
@@ -225,13 +225,13 @@ module LrExamples
             after: rp.color("end", :bright_blue),
             separator: "\n"
           ) do
-            @table_states.each do |items, state|
+            for items, state in @table_states do
               rp.inline(" ") do
                 rp.write("state")
                 rp.rp(state)
               end
               rp.multiline do
-                items.each do |current|
+                for current in items do
                   rp.inline(" ") do
                     rp.write("[")
                     production = item_production(current)
@@ -239,7 +239,7 @@ module LrExamples
                       @tokens.inverted[@production_tokens[production]]
                     )
                     rp.write("->")
-                    production_items(production).each do |item|
+                    for item in production_items(production) do
                       token = @items[item]
                       if item == current
                         rp.write(".")
@@ -325,7 +325,7 @@ module LrExamples
     def item_string(current)
       production = item_production(current)
       output = "#{token_string(@production_tokens[production])} ->"
-      production_items(production).each do |item|
+      for item in production_items(production) do
         token = @items[item]
         if item == current
           output += " ."

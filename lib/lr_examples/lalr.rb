@@ -14,7 +14,7 @@ module LrExamples
     memoized def direct_reads
       direct_reads = Hash.with_default(Set)
 
-      transitions.each do |edge, next_state|
+      for edge, next_state in transitions do
         if non_terminals.include?(edge.label)
           direct_reads[edge] = terminals & next0[next_state].keys
         end
@@ -28,10 +28,10 @@ module LrExamples
       # empty value and not nil for undefined edges.
       reads = Hash.with_default(Set)
 
-      transitions.each do |edge, next_state|
+      for edge, next_state in transitions do
         if non_terminals.include?(edge.label)
 
-          next0[next_state].keys.each do |next_token|
+          for next_token in next0[next_state].keys do
             if nullable_tokens.include?(next_token)
               reads[edge].add(Edge[next_state, next_token])
             end
@@ -63,7 +63,7 @@ module LrExamples
     memoized def accessing_edges
       accessing_edges = Hash.with_default(Set)
 
-      transitions.each do |edge, state|
+      for edge, state in transitions do
         accessing_edges[state].add(edge)
       end
 
@@ -77,13 +77,13 @@ module LrExamples
       @lookback_relation = Hash.with_default(Set)
       @includes_relation = Hash.with_default(Set)
 
-      non_terminal_transitions.each do |edge, _|
-        productions_for[edge.label].each do |production|
+      for edge, _ in non_terminal_transitions do
+        for production in productions_for[edge.label] do
           tokens = tokens_for(production)
           state = edge.from
           included = Set.new
 
-          tokens.each do |token|
+          for token in tokens do
             next_edge = Edge[state, token]
             state = transitions[next_edge]
             if state.nil?
@@ -115,7 +115,7 @@ module LrExamples
             # TODO: do we need to verify the final edge has the
             # reduction, or is it required to?
             @lookback_relation[Edge[state, production]].add(edge)
-            included.each do |other_edge|
+            for other_edge in included do
               @includes_relation[other_edge].add(edge)
             end
           end
@@ -148,8 +148,8 @@ module LrExamples
     memoized def lookahead
       lookahead = Hash.with_default(Set)
 
-      lookback_relation.each do |from_edge, to_edges|
-        to_edges.each do |edge|
+      for from_edge, to_edges in lookback_relation do
+        for edge in to_edges do
           lookahead[from_edge] += follow[edge]
         end
       end
@@ -160,10 +160,10 @@ module LrExamples
     memoized def reduce
       reduce = Hash.with_default { Hash.with_default(Set) }
 
-      lookahead.each do |edge, tokens|
+      for edge, tokens in lookahead do
         edge => Edge[state, production]
         if reduce0[state].include?(production)
-          tokens.each do |token|
+          for token in tokens do
             reduce[state][token].add(production)
           end
         end

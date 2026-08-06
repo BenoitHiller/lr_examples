@@ -16,6 +16,7 @@ Layout:
 Layout/LineLength:
   Enabled: true
   Max: 70
+  AutoCorrect: disabled
 
 # Don't lint non spec files with the spec rules
 RSpec:
@@ -95,6 +96,10 @@ Style/TrailingCommaInArrayLiteral:
 
 Style/TrailingCommaInHashLiteral:
   Enabled: true
+
+Style/For:
+  Enabled: true
+  EnforcedStyle: for
 
 # Method definitions after `private` or `protected` isolated calls need one
 # extra level of indentation.
@@ -226,4 +231,7 @@ Layout/MultilineOperationIndentation:
 Rspec/MultipleExpectations:
   Enabled: false
 RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+RSpec/ExampleLength:
   Enabled: false
