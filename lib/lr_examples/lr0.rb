@@ -149,7 +149,7 @@ module LrExamples
       # production. As the algorithm proceeds we will prune the
       # nullable tokens as we find them until it the set is empty at
       # which point we know the production is nullable.
-      production_tokens = Hash.new { |h, k| h[k] = Set.new }
+      production_dependencies = Hash.new { |h, k| h[k] = Set.new }
 
       # This is the inverse mapping for the initial value of
       # production_tokens
@@ -164,7 +164,7 @@ module LrExamples
           nullable.add(left)
         else
           if (tokens & terminals).empty?
-            production_tokens[production] = tokens
+            production_dependencies[production] = tokens
 
             tokens.each do |token|
               has_token[token].add(production)
@@ -190,9 +190,9 @@ module LrExamples
           left_token = @production_tokens[production]
 
           unless left_token in ^nullable
-            production_tokens[production].delete(token)
+            production_dependencies[production].delete(token)
 
-            if production_tokens[production].empty?
+            if production_dependencies[production].empty?
               nullable.add(left_token)
               queue.push(left_token)
             end
