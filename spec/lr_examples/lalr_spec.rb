@@ -1,5 +1,18 @@
 Edge = LrExamples::Lalr::Edge
 
+module TSV
+  refine Enumerable do
+    def to_tsv
+      output = ""
+      each do |row|
+        output += row.map(&:to_s).join("\t") + "\n"
+      end
+      output
+    end
+  end
+end
+using TSV
+
 RSpec.describe LrExamples::Lalr do
   subject(:parser) { described_class.new(grammar) }
 
@@ -108,6 +121,15 @@ RSpec.describe LrExamples::Lalr do
 
     it 'computes reduce' do
       expect(parser.reduce).to eq(expected_reduce)
+    end
+  end
+
+  context 'with Anderson Grammar' do
+    let(:grammar) { Grammars::GAnderson }
+
+    it 'prints' do
+      table = parser.action_table
+      rp table
     end
   end
 end

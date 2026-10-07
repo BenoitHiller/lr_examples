@@ -47,5 +47,23 @@ module Grammars
     B <= ["c", C]
     C <= ["d", A]
   end
+
+  class GAnderson < Productions
+    S <= [Expr, "$"]
+    Expr <= Assign
+    Expr <= If
+    Assign <= [:id, ":=", Plus]
+    If <= ["if", Cond, "then", Assign, Else]
+    Plus <= Times
+    Plus <= [Plus, "+", Times]
+    Times <= Parens
+    Times <= [Times, "*", Parens]
+    Parens <= ["(", Plus, ")"]
+    Parens <= :id
+    Cond <= [Cond, "or", :id]
+    Cond <= :id
+    Else <= ["else", Expr]
+    Else <= []
+  end
 end
 # rubocop:enable Lint/Void

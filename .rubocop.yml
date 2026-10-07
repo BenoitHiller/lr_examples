@@ -102,15 +102,9 @@ Style/TrailingCommaInHashLiteral:
 
 Style/For:
   Enabled: true
-  EnforcedStyle: for
-  Exclude:
-    - 'spec/**/*'
 
 Style/BlockDelimiters:
   Enabled: true
-  EnforcedStyle: always_braces
-  Exclude:
-    - 'spec/**/*'
 
 # Method definitions after `private` or `protected` isolated calls need one
 # extra level of indentation.

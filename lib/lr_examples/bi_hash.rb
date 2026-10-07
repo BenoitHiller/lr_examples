@@ -2,11 +2,11 @@ require 'forwardable'
 
 module LrExamples
   class BiHash
-    Inverted = Data.define(:value) {
+    Inverted = Data.define(:value) do
       def inverted
         value
       end
-    }
+    end
 
     module InverseRefinements
       refine Object do
@@ -96,9 +96,9 @@ module LrExamples
     end
 
     def transform_values!(&block)
-      each { |key, value|
+      each do |key, value|
         self[key] = block[value]
-      }
+      end
 
       self
     end
@@ -107,25 +107,33 @@ module LrExamples
       @data.length / 2
     end
 
+    def update(*others)
+      others.each do |hash|
+        hash.each do |key, value|
+          self[key] = value
+        end
+      end
+    end
+
     def report_print(rp)
-      rp.inline {
+      rp.inline do
         rp.write_header(self, write_id: false)
-        rp.inline(" ") {
+        rp.inline(" ") do
           rp.write("{")
           rp.write_object_id(self)
-        }
-      }
-      rp.multiline(after: "}", separator: ",") {
-        each { |key, value|
-          rp.inline {
+        end
+      end
+      rp.multiline(after: "}", separator: ",") do
+        each do |key, value|
+          rp.inline do
             rp.rp(key)
-            rp.inline(" ") {
+            rp.inline(" ") do
               rp.write("<=>")
               rp.rp(value)
-            }
-          }
-        }
-      }
+            end
+          end
+        end
+      end
     end
   end
 end

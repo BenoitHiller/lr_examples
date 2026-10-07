@@ -14,7 +14,7 @@ module LrExamples
       state = {}
       result = {}
 
-      for starting_point in edges
+      edges.each do |starting_point|
         # The outer loop starts an iteration with the next unvisited
         # edge after the previous starting point has traversed all
         # reachable nodes.
@@ -41,14 +41,14 @@ module LrExamples
             state[edge] = path.length
             result[edge] = f[edge]
 
-            for other in relation[edge]
+            (relation[edge]).each do |other|
               unless state.key?(other)
                 state[other] = 0
                 stack.push(other)
               end
             end
           else
-            for other in relation[edge]
+            (relation[edge]).each do |other|
               unless state[other] == 0
                 state[edge] = [state[edge], state[other]].min
                 result[edge] = result[edge] + result[other]
