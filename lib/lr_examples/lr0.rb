@@ -3,7 +3,15 @@ module LrExamples
     using CoreExtensions
     include Memoized
 
-    attr_reader :tokens, :items, :next0, :reduce0, :productions_for
+    attr_reader(
+      :tokens,
+      :items,
+      :next0,
+      :reduce0,
+      :productions_for,
+      :initial_items,
+      :table_states
+    )
 
     def initialize(productions)
       #####################
@@ -190,36 +198,8 @@ module LrExamples
       nullable
     end
 
-    def productions
-      @production_tokens.map do |id, left|
-        last = @initial_items[id + 1] || @items.length
-
-        [id, left, @initial_items[id]..last]
-      end
-    end
-
     def tokens_for(production)
       production_items(production).map(&@items)
-    end
-
-    def item_state_map
-      items_to_states = Hash.with_default(Set)
-      @table_states.each do |items, state|
-        items.each do |item|
-          items_to_states[item].add(state)
-        end
-      end
-
-      mapping = Hash.with_default(Hash)
-      productions.each do |production, _, items|
-        initial_item = items.first
-        items.each do |item|
-          mapping[production][item - initial_item] =
-            items_to_states[item]
-        end
-      end
-
-      mapping
     end
 
     def report_print(rp)
@@ -337,25 +317,6 @@ module LrExamples
       end
 
       result
-    end
-
-    def item_string(current)
-      production = item_production(current)
-      output = "#{token_string(@production_tokens[production])} ->"
-      production_items(production).each do |item|
-        token = @items[item]
-        if item == current
-          output += " ."
-        end
-        output += " "
-        output += token_string(token)
-      end
-
-      if @items[current] <= 0
-        output += " ."
-      end
-
-      output
     end
 
     def item_production(i)
