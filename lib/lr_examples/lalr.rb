@@ -5,7 +5,7 @@ module LrExamples
     include Digraph
     using CoreExtensions
 
-    memoized def direct_reads
+    memoized :frozen, def direct_reads
       direct_reads = Hash.with_default(Set)
 
       transitions.each do |edge, next_state|
@@ -54,7 +54,7 @@ module LrExamples
       end
     end
 
-    memoized def accessing_edges
+    memoized :frozen, def accessing_edges
       accessing_edges = Hash.with_default(Set)
 
       transitions.each do |edge, state|
@@ -142,7 +142,7 @@ module LrExamples
       )
     end
 
-    memoized def lookahead
+    memoized :frozen, def lookahead
       lookahead = Hash.with_default(Set)
 
       lookback_relation.each do |from_edge, to_edges|
@@ -154,7 +154,7 @@ module LrExamples
       lookahead
     end
 
-    memoized def reduce
+    memoized :frozen, def reduce
       reduce = Hash.with_default { Hash.with_default(Set) }
 
       lookahead.each do |edge, tokens|
