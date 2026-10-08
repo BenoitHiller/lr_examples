@@ -206,12 +206,46 @@ module LrExamples
 
     def productions
       @production_tokens.map do |id, left|
-        [id, left, production_items.map(&@items)]
+        last = @initial_items[id + 1] || @items.length
+
+        [id, left, @initial_items[id]..last]
       end
     end
 
     def tokens_for(production)
       production_items(production).map(&@items)
+    end
+
+    def item_state_map
+      items_to_states = Hash.with_default(Set)
+      @table_states.each do |items, state|
+        items.each do |item|
+          items_to_states[item].add(state)
+        end
+      end
+
+      mapping = Hash.with_default(Hash)
+      productions.each do |production, _, items|
+        initial_item = items.first
+        items.each do |item|
+          mapping[production][item - initial_item] =
+            items_to_states[item]
+        end
+      end
+
+      mapping
+    end
+
+    def state_for(production_index, item_index)
+      item = @initial_items[production_index] + item_index
+
+      match = @table_states.find do |items, _|
+        items.include?(item)
+      end
+
+      if match
+        match[1]
+      end
     end
 
     def report_print(rp)
@@ -296,7 +330,11 @@ module LrExamples
         @items[item - 1]
 
         # Then this converts the lists of grouped items into sets
-      end.transform_values { |array| array.to_set() }
+      end.transform_values do |array|
+        array.to_set()
+      end.sort_by do |token, _|
+        token
+      end
     end
 
     def closure(item_set)

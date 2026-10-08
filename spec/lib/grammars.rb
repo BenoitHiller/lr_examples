@@ -2,16 +2,16 @@
 module Grammars
   Productions = LrExamples::Productions
   class G1 < Productions
-    S <= [A, "$"]
+    S <= A
     A <= ["(", A, ")", A]
     A <= []
   end
 
   class G3 < Productions
-    S <= [E, "$"]
+    S <= E
 
-    E <= [E, "+", B]
     E <= [E, "*", B]
+    E <= [E, "+", B]
     E <= B
 
     B <= "0"
@@ -19,37 +19,37 @@ module Grammars
   end
 
   class G4 < Productions
-    S <= [A, "$"]
+    S <= E
 
-    A <= [B, C, D, A]
-    A <= "a"
+    E <= [F, C, D, E]
+    E <= "a"
 
-    B <= []
+    F <= []
     C <= []
     D <= []
   end
 
   class G5 < Productions
-    S <= [A, "$"]
-    A <= ["b", B]
-    A <= "a"
+    S <= E
+    E <= ["f", F]
+    E <= "e"
 
-    B <= ["c", C]
-    C <= ["d", A]
+    F <= ["g", G]
+    G <= ["h", E]
   end
 
   class G5B < Productions
-    S <= [A, "$"]
-    A <= ["b", B]
-    A <= "a"
-    A <= "b"
+    S <= E
+    E <= ["f", F]
+    E <= "e"
+    E <= "f"
 
-    B <= ["c", C]
-    C <= ["d", A]
+    F <= ["g", G]
+    G <= ["h", E]
   end
 
   class GAnderson < Productions
-    S <= [Expr, "$"]
+    S <= Expr
     Expr <= Assign
     Expr <= If
     Assign <= [:id, ":=", Plus]

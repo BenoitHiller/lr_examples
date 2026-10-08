@@ -43,7 +43,9 @@ module LrExamples
       end
 
       def each(&block)
-        inverted.each(true).map { |key, value| [key.inverted, value] }.each(&block)
+        inverted.each(true).map do |key, value|
+          [key.inverted, value]
+        end.each(&block)
       end
 
       def keys
@@ -88,7 +90,9 @@ module LrExamples
     end
 
     def each(inverted = false, &block)
-      @data.filter { |key, _| key.is_a?(Inverted) == inverted }.each(&block)
+      @data.filter do
+        |key, _| key.is_a?(Inverted) == inverted
+      end.each(&block)
     end
 
     def keys

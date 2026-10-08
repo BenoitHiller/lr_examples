@@ -2,45 +2,29 @@ EXPECTED_STATES = [
   {
     reduce0: Set[],
     items: [
-      "S -> . E '$'",
-      "E -> . E '+' B",
+      "$accept -> . S '$'",
+      "S -> . E",
       "E -> . E '*' B",
+      "E -> . E '+' B",
       "E -> . B",
       "B -> . '0'",
       "B -> . '1'"
     ],
     next0: {
-      '0' => 3,
-      '1' => 4,
-      E: 1,
-      B: 2
+      '0' => 1,
+      '1' => 2,
+      S: 3,
+      E: 4,
+      B: 5
     }
   }, {
-    reduce0: Set[],
-    items: [
-      "S -> E . '$'",
-      "E -> E . '+' B",
-      "E -> E . '*' B"
-    ],
-    next0: {
-      '$' => 5,
-      '+' => 6,
-      '*' => 7
-    }
-  }, {
-    reduce0: Set[3],
-    items: [
-      "E -> B ."
-    ],
-    next0: {}
-  }, {
-    reduce0: Set[4],
+    reduce0: Set[5],
     items: [
       "B -> '0' ."
     ],
     next0: {}
   }, {
-    reduce0: Set[5],
+    reduce0: Set[6],
     items: [
       "B -> '1' ."
     ],
@@ -48,21 +32,34 @@ EXPECTED_STATES = [
   }, {
     reduce0: Set[],
     items: [
-      "S -> E '$' ."
+      "$accept -> S . '$'"
+    ],
+    next0: {
+      '$' => 6
+    }
+  }, {
+    reduce0: Set[1],
+    items: [
+      "S -> E .",
+      "E -> E . '*' B",
+      "E -> E . '+' B"
+    ],
+    next0: {
+      '*' => 7,
+      '+' => 8
+    }
+  }, {
+    reduce0: Set[4],
+    items: [
+      "E -> B ."
     ],
     next0: {}
   }, {
     reduce0: Set[],
     items: [
-      "E -> E '+' . B",
-      "B -> . '0'",
-      "B -> . '1'"
+      "$accept -> S '$' ."
     ],
-    next0: {
-      '0' => 3,
-      '1' => 4,
-      B: 8
-    }
+    next0: {}
   }, {
     reduce0: Set[],
     items: [
@@ -71,20 +68,32 @@ EXPECTED_STATES = [
       "B -> . '1'"
     ],
     next0: {
-      '0' => 3,
-      '1' => 4,
+      '0' => 1,
+      '1' => 2,
       B: 9
     }
   }, {
-    reduce0: Set[1],
+    reduce0: Set[],
     items: [
-      "E -> E '+' B ."
+      "E -> E '+' . B",
+      "B -> . '0'",
+      "B -> . '1'"
     ],
-    next0: {}
+    next0: {
+      '0' => 1,
+      '1' => 2,
+      B: 10
+    }
   }, {
     reduce0: Set[2],
     items: [
       "E -> E '*' B ."
+    ],
+    next0: {}
+  }, {
+    reduce0: Set[3],
+    items: [
+      "E -> E '+' B ."
     ],
     next0: {}
   }
@@ -111,7 +120,7 @@ RSpec.describe LrExamples::Lr0 do
         parser.tokens.inverted[id]
       end.to_set
 
-      expect(tokens).to eq(Set[:B, :C, :D])
+      expect(tokens).to eq(Set[:F, :C, :D])
     end
   end
 end

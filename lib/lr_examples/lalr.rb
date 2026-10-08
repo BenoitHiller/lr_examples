@@ -62,6 +62,7 @@ module LrExamples
           [-1, 0]
         end
       end
+
       # A value more negative than the minimum that can be in the
       # packed table.
       @default_base = -@state_count
@@ -159,49 +160,6 @@ module LrExamples
         rp.rp(@packed)
         rp.rp(@check)
         rp.rp(@defaults)
-        return
-
-        @vectors.each_with_index.each do |vector, i|
-          is_state = i < @state_count
-          rp.inline(" ") do
-            default = @defaults[i]
-            if is_state
-              rp.write("State")
-              rp.write(i)
-              if default > 0
-                rp.write("default")
-                rp.rp(-default)
-              end
-            else
-              rp.write("Goto on")
-              token = i - @state_count + @non_terminal_base
-              rp.rp(@tokens[token])
-              if default > 0
-                rp.write("default")
-                rp.rp(default)
-              end
-            end
-          end
-
-          unless vector
-            next
-          end
-
-          rp.inline("\t") do
-            (vector[0]).each do |from|
-              if is_state
-                rp.rp(@tokens[from])
-              else
-                rp.rp(from)
-              end
-            end
-          end
-          rp.inline("\t") do
-            (vector[1]).each do |action|
-              rp.rp(action)
-            end
-          end
-        end
       end
     end
 
@@ -317,7 +275,7 @@ module LrExamples
       direct_reads
     end
 
-    memoized def reads_relation
+    memoized :frozen, def reads_relation
       # Note that it is important that the reads_relation returns an
       # empty value and not nil for undefined edges.
       reads = Hash.with_default(Set)
@@ -336,7 +294,7 @@ module LrExamples
       reads
     end
 
-    memoized def reads
+    memoized :frozen, def reads
       digraph(reads_relation, transitions.keys, &direct_reads)
     end
 
@@ -415,6 +373,9 @@ module LrExamples
           end
         end
       end
+
+      @includes_relation.freeze
+      @lookback_relation.freeze
     end
 
     def includes_relation
@@ -504,6 +465,7 @@ module LrExamples
         [(non_terminals & tokens).empty? ? 1 : 0, i]
       end
       to_order = order.each_with_index.to_h
+
       @table_states.length.times.each do |i|
         state = order[i]
         shifts = @next0[state]
@@ -554,7 +516,7 @@ module LrExamples
 
       state_count = @table_states.length
 
-      # Separate out the non-terminal actions and place them ate the
+      # Separate out the non-terminal actions and place them at the
       # end of the mappings list, with state and token transposed.
       #
       # Note we also explicitly iterate over a copy of keys here

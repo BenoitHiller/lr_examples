@@ -33,7 +33,9 @@ module LrExamples
       end
 
       def init
-        @productions = []
+        accept = Token.new(self, :$accept)
+        start = Token.new(self, :S)
+        @productions = [[accept.token, [start.token, "$"]]]
       end
 
       def define(left, right)

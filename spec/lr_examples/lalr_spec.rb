@@ -17,36 +17,54 @@ RSpec.describe LrExamples::Lalr do
   subject(:parser) { described_class.new(grammar) }
 
   let(:tokens) { parser.tokens }
+  let(:states) { parser.item_state_map }
   let(:empty_transition_map) do
     parser.transitions.transform_values { Set[] }
   end
 
+  def edge(state, token)
+    case state
+    in Integer => production, Integer => index
+      Edge[state(production, index), tokens[token]]
+    else
+      Edge[state, tokens[token]]
+    end
+  end
+
+  def state(production, index)
+    states[production][index].first
+  end
+
   context 'with Grammar 4' do
     let(:grammar) { Grammars::G4 }
+    # We identify states by asking "which state contains the nth
+    # item of production 2".
+    #
+    # This relies on this particular grammar only having a single
+    # entry for each such case, which is true here except for in the
+    # case of state 0.
+    let(:p2) { states[2].transform_values(&:first) }
     let(:expected_relation) do
-      # This is unfortunately an extremely brittle test, but there is
-      # little that can be done about that. Fetching the state ids by
-      # some dynamic means would either add significant undesirable
-      # constraints or compromise the test through introducing
-      # circular dependency.
       {
-        Edge[0, tokens[:B]] => Set[Edge[2, tokens[:C]]],
-        Edge[2, tokens[:C]] => Set[Edge[5, tokens[:D]]],
-        Edge[5, tokens[:D]] => Set[Edge[6, tokens[:B]]],
-        Edge[6, tokens[:B]] => Set[Edge[2, tokens[:C]]]
+        edge(0, :F) => Set[edge(p2[1], :C)],
+        edge(p2[1], :C) => Set[edge(p2[2], :D)],
+        edge(p2[2], :D) => Set[edge(p2[3], :F)],
+        edge(p2[3], :F) => Set[edge(p2[1], :C)]
       }
     end
+
     let(:expected_reads) do
       empty_transition_map.merge({
-        Edge[0, tokens[:A]] => Set[tokens["$"]],
-        Edge[0, tokens[:B]] => Set[tokens["a"]],
-        Edge[2, tokens[:C]] => Set[tokens["a"]],
-        Edge[5, tokens[:D]] => Set[tokens["a"]],
-        Edge[6, tokens[:B]] => Set[tokens["a"]]
+        edge(0, :S) => Set[tokens["$"]],
+        edge(0, :F) => Set[tokens["a"]],
+        edge(p2[1], :C) => Set[tokens["a"]],
+        edge(p2[2], :D) => Set[tokens["a"]],
+        edge(p2[3], :F) => Set[tokens["a"]]
       })
     end
 
     it 'computes the reads relation' do
+      parser.reads
       expect(parser.reads_relation).to match(expected_relation)
     end
 
@@ -59,19 +77,21 @@ RSpec.describe LrExamples::Lalr do
     let(:grammar) { Grammars::G5 }
     let(:expected_relation) do
       {
-        Edge[2, tokens[:B]] => Set[
-          Edge[0, tokens[:A]], Edge[8, tokens[:A]]
+        edge([1, 0], :E) => Set[edge([0, 0], :S)],
+        edge([2, 1], :F) => Set[
+          edge([1, 0], :E), edge([5, 1], :E)
         ],
-        Edge[8, tokens[:A]] => Set[Edge[6, tokens[:C]]],
-        Edge[6, tokens[:C]] => Set[Edge[2, tokens[:B]]]
+        edge([5, 1], :E) => Set[edge([4, 1], :G)],
+        edge([4, 1], :G) => Set[edge([2, 1], :F)]
       }
     end
     let(:expected_follow) do
       {
-        Edge[0, tokens[:A]] => Set[tokens["$"]],
-        Edge[2, tokens[:B]] => Set[tokens["$"]],
-        Edge[8, tokens[:A]] => Set[tokens["$"]],
-        Edge[6, tokens[:C]] => Set[tokens["$"]]
+        edge([0, 0], :S) => Set[tokens["$"]],
+        edge([1, 0], :E) => Set[tokens["$"]],
+        edge([2, 1], :F) => Set[tokens["$"]],
+        edge([5, 1], :E) => Set[tokens["$"]],
+        edge([4, 1], :G) => Set[tokens["$"]]
       }
     end
 
@@ -91,23 +111,26 @@ RSpec.describe LrExamples::Lalr do
         Edge[0, 7] => Set[tokens["$"]]
       })
     end
+
     let(:expected_lookahead) do
       {
-        Edge[2, 3] => Set[tokens["$"]],
-        Edge[3, 2] => Set[tokens["$"]],
-        Edge[5, 1] => Set[tokens["$"]],
-        Edge[7, 4] => Set[tokens["$"]],
-        Edge[9, 5] => Set[tokens["$"]]
+        Edge[state(1, 1), 1] => Set[tokens["$"]],
+        Edge[state(2, 2), 2] => Set[tokens["$"]],
+        Edge[state(3, 1), 3] => Set[tokens["$"]],
+        Edge[state(4, 2), 4] => Set[tokens["$"]],
+        Edge[state(5, 2), 5] => Set[tokens["$"]],
+        Edge[state(6, 2), 6] => Set[tokens["$"]]
       }
     end
 
     let(:expected_reduce) do
       {
-        2 => { tokens["$"] => Set[3] },
-        3 => { tokens["$"] => Set[2] },
-        5 => { tokens["$"] => Set[1] },
-        7 => { tokens["$"] => Set[4] },
-        9 => { tokens["$"] => Set[5] }
+        state(1, 1) => { tokens["$"] => Set[1] },
+        state(2, 2) => { tokens["$"] => Set[2] },
+        state(3, 1) => { tokens["$"] => Set[3] },
+        state(4, 2) => { tokens["$"] => Set[4] },
+        state(5, 2) => { tokens["$"] => Set[5] },
+        state(6, 2) => { tokens["$"] => Set[6] }
       }
     end
 
@@ -129,7 +152,6 @@ RSpec.describe LrExamples::Lalr do
 
     it 'prints' do
       table = parser.action_table
-      rp table
     end
   end
 end
