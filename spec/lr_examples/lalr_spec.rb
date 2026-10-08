@@ -147,8 +147,8 @@ RSpec.describe LrExamples::Lalr do
     end
   end
 
-  context 'with Anderson Grammar' do
-    let(:grammar) { Grammars::GAnderson }
+  context 'with Grammar 6' do
+    let(:grammar) { Grammars::G6 }
 
     it 'prints' do
       table = parser.action_table

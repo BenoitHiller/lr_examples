@@ -38,6 +38,8 @@ module Grammars
     G <= ["h", E]
   end
 
+  # A slight modification of the above specifically to cause the LALR
+  # parser to need to use lookahead to distinguish states.
   class G5B < Productions
     S <= E
     E <= ["f", F]
@@ -48,7 +50,7 @@ module Grammars
     G <= ["h", E]
   end
 
-  class GAnderson < Productions
+  class G6 < Productions
     S <= Expr
     Expr <= Assign
     Expr <= If

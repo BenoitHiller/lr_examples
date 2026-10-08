@@ -1,6 +1,47 @@
 require_relative 'digraph'
 
 module LrExamples
+  ActionTable2 = Struct.new(
+    :packed,
+    :check,
+    :base,
+    :base_goto,
+    :default_reductions,
+    :default_gotos,
+    :invalid_base,
+    :tokens,
+    :non_terminal_base
+  ) do
+    def report_print(rp)
+      rp.multiline do
+        rp.write("Index\tPacked")
+        packed.each_with_index do |entry, i|
+          rp.inline("\t") do
+            rp.rp(i)
+            rp.rp(entry)
+          end
+        end
+        rp.write("Index\tBase\tCheck\tDefault")
+        base.each_with_index do |entry, i|
+          rp.inline("\t") do
+            rp.rp(i)
+            rp.rp(entry)
+            rp.rp(check[i])
+            rp.rp(default_reductions[i])
+          end
+        end
+        rp.write("Base\tDefault\tToken")
+        base_goto.each_with_index do |entry, i|
+          rp.inline("\t") do
+            rp.rp(entry)
+            rp.rp(default_gotos[i])
+            rp.rp(tokens.inverted[i + non_terminal_base])
+          end
+        end
+      end
+    end
+  end
+
   class ActionTable
     def initialize(tokens, actions, non_terminals)
       @tokens = tokens
@@ -68,7 +109,7 @@ module LrExamples
       @default_base = -@state_count
       @packed = []
       @check = []
-      @base = []
+      @base = Array.new(@size)
       order.each_with_index.each do |n, index|
         vector = @vectors[n]
         unless vector && !vector[0].empty?
@@ -111,6 +152,7 @@ module LrExamples
 
     def report_print(rp)
       rp.multiline(indent: 0) do
+        rp.rp(@tokens)
         rp.write("T-Table")
         rp.inline("\t") do
           rp.write("State")
@@ -156,10 +198,32 @@ module LrExamples
             end
           end
         end
-        rp.rp(@base)
-        rp.rp(@packed)
-        rp.rp(@check)
-        rp.rp(@defaults)
+        rp.write("State\tBase\tDefault")
+        @state_count.times.each do |state|
+          rp.inline("\t") do
+            rp.rp(state)
+            rp.rp(@base[state])
+            rp.rp(@defaults[state])
+          end
+        end
+
+        rp.write("Index\tPacked\tCheck")
+        @packed.each_with_index do |entry, i|
+          rp.inline("\t") do
+            rp.rp(i)
+            rp.rp(entry)
+            rp.rp(@check[i])
+          end
+        end
+        rp.write("Token\tBase\tDefault")
+        (@state_count...@size).each do |i|
+          token = i - @state_count + @non_terminal_base
+          rp.inline("\t") do
+            rp.rp(@tokens[token])
+            rp.rp(@base[i])
+            rp.rp(@defaults[i])
+          end
+        end
       end
     end
 
@@ -531,6 +595,16 @@ module LrExamples
         end
       end
 
+      rp mappings
+
+      widths = mappings.transform_values do |_, actions|
+        if actions && !actions.empty?
+          actions.keys.max - actions.keys.min
+        else
+          -1
+        end
+      end
+
       default_reductions = {}
       default_gotos = {}
       mappings.each do |index, actions|
@@ -572,7 +646,7 @@ module LrExamples
           # fetch values at base + default_key locations, if we don't
           # consider this when picking a base that could result in
           # attempting to read from a negative index.
-          [actions.keys.max - actions.keys.min, actions.length]
+          [widths[index], actions.length]
         else
           [-1, 0]
         end
@@ -628,11 +702,11 @@ module LrExamples
       # a token number into a key.
       base_goto = {}
 
-      goto_keys = base.keys.filter do |key|
-        key >= @table_states.length
-      end
-      goto_keys.each do |key|
-        base_goto[key - @table_states.length] = base.delete(key)
+      non_terminals.length.times do |i|
+        key = @table_states.length + i
+        if base.key?(key)
+          base_goto[i - 1] = base.delete(key)
+        end
       end
 
       # Finally fix everything up by filling in default values in the
@@ -642,10 +716,6 @@ module LrExamples
       # In the main table 0 indicates that the default should be used
       packed.map! { |value| value || 0 }
 
-      # In the check table a 0 entry is technically valid, for a goto
-      # from state 0, so we use -1 to mark invalid values.
-      check.map! { |value| value.nil? ? -1 : value }
-
       # Compute an unused base number to use to mark invalid bases
       invalid_base = [base.values.min, base_goto.values.min].min - 1
 
@@ -653,7 +723,18 @@ module LrExamples
         base.fetch(i, invalid_base)
       end
 
-      base_goto = Array.new(base_goto.keys.max + 1) do |i|
+      # In the check table a 0 entry is technically valid, for a goto
+      # from state 0, so we use -1 to mark invalid values.
+      check = Array.new(base.length) do |i|
+        value = check[i]
+        if value.nil?
+          -1
+        else
+          value
+        end
+      end
+
+      base_goto = Array.new(non_terminals.length) do |i|
         base_goto.fetch(i, invalid_base)
       end
 
@@ -662,18 +743,23 @@ module LrExamples
       end
 
       default_gotos = Array.new(base_goto.length) do |i|
-        default_gotos.fetch(i + @table_states.length, invalid_base)
+        default_gotos.fetch(
+          i + @table_states.length + 1,
+          invalid_base
+        )
       end
 
-      {
+      ActionTable2.new(
         packed: packed,
         check: check,
         base: base,
         base_goto: base_goto,
         default_reductions: default_reductions,
         default_gotos: default_gotos,
-        invalid_base: invalid_base
-      }
+        invalid_base: invalid_base,
+        tokens: @tokens,
+        non_terminal_base: non_terminals.min
+      )
     end
 
     def report_print(rp)
