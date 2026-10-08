@@ -47,7 +47,7 @@ module LrExamples
       end
 
       def const_missing(name)
-        Token.new(self, name)
+        const_set(name, Token.new(self, name))
       end
     end
   end

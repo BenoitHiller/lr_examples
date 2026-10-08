@@ -5,12 +5,6 @@ module LrExamples
     include Digraph
     using CoreExtensions
 
-    Edge = Data.define(:from, :label) do
-      def format(parser)
-        "[#{from}, #{parser.tokens.inverted[label]}]"
-      end
-    end
-
     memoized def direct_reads
       direct_reads = Hash.with_default(Set)
 
