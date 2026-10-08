@@ -121,20 +121,6 @@ module LrExamples
       end
     end
 
-    def states
-      (0...@table_states.length).map do |i|
-        {
-          reduce0: @reduce0[i],
-          next0: @next0[i].map do |token, state|
-            [@tokens.inverted[token], state]
-          end.to_h,
-          items: @table_states.inverted[i].map do |item|
-            item_string(item)
-          end
-        }
-      end
-    end
-
     memoized def terminals
       (1..@terminals_count).to_set
     end
