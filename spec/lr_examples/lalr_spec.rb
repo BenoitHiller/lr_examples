@@ -146,12 +146,4 @@ RSpec.describe LrExamples::Lalr do
       expect(parser.reduce).to eq(expected_reduce)
     end
   end
-
-  context 'with Grammar 6' do
-    let(:grammar) { Grammars::G6 }
-
-    it 'prints' do
-      table = parser.action_table
-    end
-  end
 end
