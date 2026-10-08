@@ -236,18 +236,6 @@ module LrExamples
       mapping
     end
 
-    def state_for(production_index, item_index)
-      item = @initial_items[production_index] + item_index
-
-      match = @table_states.find do |items, _|
-        items.include?(item)
-      end
-
-      if match
-        match[1]
-      end
-    end
-
     def report_print(rp)
       rp.write_header(self)
       rp.multiline do
