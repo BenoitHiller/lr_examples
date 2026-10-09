@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require "bundler/setup"
+require "pry"
+require_relative "../lib/lr_examples"
+
+# For use in the articles, grab the location and content of a method
+target = ARGV[0]
+
+method = Pry::Method.from_str(ARGV[0])
+puts method.source_file
+puts method.source_line
+puts method.source
