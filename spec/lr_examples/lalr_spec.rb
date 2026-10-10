@@ -87,7 +87,7 @@ RSpec.describe LrExamples::Lalr do
       }
     end
 
-    let(:expected_reads) do
+    let(:expected_read) do
       empty_transition_map.merge({
         edge(0, S) => Set[tokens["$"]],
         edge(0, F) => Set[tokens["a"]],
@@ -101,12 +101,12 @@ RSpec.describe LrExamples::Lalr do
       expect(parser.reads_relation).to match(expected_relation)
     end
 
-    it 'computes reads' do
-      expect(parser.reads).to eq(expected_reads)
+    it 'computes read' do
+      expect(parser.read).to eq(expected_read)
     end
 
     it "doesn't modify the reads relation when computing reads" do
-      parser.reads
+      parser.read
       expect(parser.reads_relation).to match(expected_relation)
     end
   end
@@ -144,7 +144,7 @@ RSpec.describe LrExamples::Lalr do
 
   context 'with Grammar 5B' do
     let(:grammar) { Grammars::G5B }
-    let(:expected_reads) do
+    let(:expected_read) do
       empty_transition_map.merge({
         Edge[0, 7] => Set[tokens["$"]]
       })
@@ -173,7 +173,7 @@ RSpec.describe LrExamples::Lalr do
     end
 
     it 'computes reads' do
-      expect(parser.reads).to eq(expected_reads)
+      expect(parser.read).to eq(expected_read)
     end
 
     it 'computes the lookahead sets' do

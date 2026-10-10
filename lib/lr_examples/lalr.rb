@@ -136,10 +136,10 @@ module LrExamples
       reads
     end
 
-    def reads
+    def read
       digraph(reads_relation, transitions.keys, &direct_reads)
     end
-    memoized :frozen, :reads
+    memoized :frozen, :read
 
     def includes_relation
       unless defined? @includes_relation
@@ -217,7 +217,7 @@ module LrExamples
       digraph(
         includes_relation,
         non_terminal_transitions.keys,
-        &reads
+        &read
       )
     end
     memoized :follow
