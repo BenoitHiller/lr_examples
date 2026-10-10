@@ -7,9 +7,12 @@ require_relative "../lib/lr_examples"
 target = ARGV[0]
 
 method = Pry::Method.from_str(ARGV[0])
+while method.owner.is_a?(LrExamples::Memoized::Memoizer)
+  method = Pry::Method(method.super_method)
+end
 puts method.source_file
 puts method.source_line
-if method.comment
+unless method.comment.empty?
   puts method.comment
 end
 puts method.source

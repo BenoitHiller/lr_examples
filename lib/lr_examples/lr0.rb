@@ -137,7 +137,7 @@ module LrExamples
       ((@terminals_count + 1)..@tokens.length).to_set
     end
 
-    memoized def nullable_tokens
+    def nullable_tokens
       nullable = Set.new
 
       # The set of non_terminals on the right hand side of each
@@ -197,6 +197,8 @@ module LrExamples
 
       nullable
     end
+    # on a separate line to keep it out of the example source
+    memoized :nullable_tokens
 
     def tokens_for(production)
       production_items(production).map(&@items)

@@ -1,5 +1,6 @@
 module LrExamples
   module Memoized
+    class Memoizer < Module; end
     module ClassMethods
       def memoized(*args)
         freeze_cache = false
@@ -12,25 +13,31 @@ module LrExamples
             "accepts either a method name or :freeze, method_name"
         end
 
-        inner_method = instance_method(name)
+        unless defined? @memoizer
+          @memoizer = Memoizer.new
+          prepend @memoizer
+        end
+
         cache_name = :"@memo__#{name}"
 
-        define_method(name) do
-          unless instance_variable_defined?(cache_name)
+        @memoizer.module_exec do
+          define_method(name) do
+            unless instance_variable_defined?(cache_name)
 
-            value = inner_method.bind_call(self)
+              value = super()
 
-            if freeze_cache
-              value.freeze
+              if freeze_cache
+                value.freeze
+              end
+
+              instance_variable_set(
+                cache_name,
+                value
+              )
             end
 
-            instance_variable_set(
-              cache_name,
-              value
-            )
+            instance_variable_get(cache_name)
           end
-
-          instance_variable_get(cache_name)
         end
       end
     end
