@@ -1,35 +1,26 @@
 # LrExamples
 
-TODO: Delete this and the text below, and describe your gem
+This repository includes a set of examples for use in the parsing articles on [benoithiller.com/parsing](https://benoithiller.com/parsing).
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/lr_examples`. To experiment with that code, run `bin/console` for an interactive prompt.
+The code is thus formatted specifically to render well in the articles(such as having a very narrow width), while still being in a format that can be tested.
 
-## Installation
+## Structure
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Currently the project is primarily composed of the following modules
 
-Install the gem and add to the application's Gemfile by executing:
+* [LrExamples::Lr0](lib/lr_examples/lr0.rb) containing most of the generic tools for LR parser construction.
+* [LrExamples::Lalr](lib/lr_examples/lalr.rb) building on `Lr0` with additional code needed to generate a LALR parser.
+
+## Testing
+
+If you want to run the tests yourself you can install the dependencies by doing:
 
 ```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+bundle install
 ```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+Then make use of the following command to run the rspec tests:
 
-```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
 ```
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/BenoitHiller/lr_examples.
+rake spec
+```
