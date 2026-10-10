@@ -136,9 +136,10 @@ module LrExamples
       reads
     end
 
-    memoized :frozen, def reads
+    def reads
       digraph(reads_relation, transitions.keys, &direct_reads)
     end
+    memoized :frozen, :reads
 
     def includes_relation
       unless defined? @includes_relation
@@ -212,15 +213,16 @@ module LrExamples
     end
     private :compute_path_relations
 
-    memoized def follow
+    def follow
       digraph(
         includes_relation,
         non_terminal_transitions.keys,
         &reads
       )
     end
+    memoized :follow
 
-    memoized :frozen, def lookahead
+    def lookahead
       lookahead = Hash.with_default(Set)
 
       lookback_relation.each do |from_edge, to_edges|
@@ -231,11 +233,14 @@ module LrExamples
 
       lookahead
     end
+    memoized :frozen, :lookahead
 
-    memoized :frozen, def reduce
+    def reduce
       reduce = Hash.with_default { Hash.with_default(Set) }
 
       lookahead.each do |edge, tokens|
+        # This is syntax to destructure the `edge` variable and assign
+        # its two fields to the variables `state` and `production`.
         edge => Edge[state, production]
         if reduce0[state].include?(production)
           tokens.each do |token|
@@ -246,5 +251,6 @@ module LrExamples
 
       reduce
     end
+    memoized :frozen, :reduce
   end
 end
