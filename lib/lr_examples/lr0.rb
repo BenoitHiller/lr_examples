@@ -73,60 +73,7 @@ module LrExamples
       # Compute Tables #
       ##################
 
-      @table_states = BiHash.new
-      # The item set for state 0 is initialized to be the closure of
-      # item 0, the start item.
-      @table_states[closure(Set[0])] = 0
-
-      # Initialize @next0 to a hash that initializes any missing keys
-      # to a new nested hash when you attempt to access them.
-      @next0 = Hash.with_default(Hash)
-
-      i = 0
-      while i < @table_states.length
-        table = @table_states.inverted[i]
-
-        successors(table).each do |token, new_table|
-          # Skip generating the table that would shift the eof token,
-          # as we accept the input instead of visiting that state.
-          if token == 0
-            next
-          end
-
-          new_table = closure(new_table)
-
-          # The only terribly smart thing we have to do in this whole
-          # process is checking to see if the generated item set
-          # already exists, and if so simply put in a @next0 entry
-          # pointing to it.
-          if @table_states.key?(new_table)
-            @next0[i][token] = @table_states[new_table]
-          else
-            id = @table_states.length
-            @table_states[new_table] = id
-            @next0[i][token] = id
-          end
-        end
-
-        i += 1
-      end
-
-      # Initialize @reduce0 to a hash that initializes any missing
-      # keys to an empty set when you attempt to access them.
-      @reduce0 = Hash.with_default(Set)
-
-      @table_states.each do |table, i|
-        table.each do |item|
-          token = @items[item]
-          # This is where putting the -production ids in the @items
-          # array starts to pay off. We can find all of the items that
-          # result in a reduction in a state just by looking for the
-          # negative tokens
-          if token < 0
-            @reduce0[i].add(-token)
-          end
-        end
-      end
+      build_table_states!
     end
 
     memoized def terminals
@@ -343,6 +290,77 @@ module LrExamples
       first = @initial_items[production]
       last = @initial_items[production + 1] || @items.length
       first...(last - 1)
+    end
+
+    private
+
+    def build_table_states!
+      # BiHash is a class I wrote that defines a bidirectional
+      # hashmap, such that you can access it in the opposite direction
+      # through the `inverted` method.
+      #
+      # This keeps the implementation a bit shorter, but you will
+      # likely want to just maintain both maps in sync when doing this
+      # yourself.
+      #
+      # There are many quirks to such a data-structure and there is
+      # thus a good reason it isn't in the standard library for any
+      # language.
+      @table_states = BiHash.new
+
+      # The item set for state 0 is initialized to be the closure of
+      # item 0, the start item.
+      @table_states[closure(Set[0])] = 0
+
+      # Initialize @next0 to a hash that initializes any missing keys
+      # to a new nested hash when you attempt to access them.
+      @next0 = Hash.with_default(Hash)
+
+      i = 0
+      while i < @table_states.length
+        table = @table_states.inverted[i]
+
+        successors(table).each do |token, new_table|
+          # Skip generating the table that would shift the eof token,
+          # as we accept the input instead of visiting that state.
+          if token == 0
+            next
+          end
+
+          new_table = closure(new_table)
+
+          # The only terribly smart thing we have to do in this whole
+          # process is checking to see if the generated item set
+          # already exists, and if so simply put in a @next0 entry
+          # pointing to it.
+          if @table_states.key?(new_table)
+            @next0[i][token] = @table_states[new_table]
+          else
+            id = @table_states.length
+            @table_states[new_table] = id
+            @next0[i][token] = id
+          end
+        end
+
+        i += 1
+      end
+
+      # Initialize @reduce0 to a hash that initializes any missing
+      # keys to an empty set when you attempt to access them.
+      @reduce0 = Hash.with_default(Set)
+
+      @table_states.each do |table, i|
+        table.each do |item|
+          token = @items[item]
+          # This is where putting the -production ids in the @items
+          # array starts to pay off. We can find all of the items that
+          # result in a reduction in a state just by looking for the
+          # negative tokens
+          if token < 0
+            @reduce0[i].add(-token)
+          end
+        end
+      end
     end
   end
 end
