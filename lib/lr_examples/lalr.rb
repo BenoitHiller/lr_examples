@@ -157,7 +157,7 @@ module LrExamples
     # The lookback and includes relations can be computed efficiently
     # at the same time because they both involve the same traversal of
     # paths defined by the tokens in some production.
-    private def compute_path_relations
+    def compute_path_relations
       @lookback_relation = Hash.with_default(Set)
       @includes_relation = Hash.with_default(Set)
 
@@ -196,8 +196,6 @@ module LrExamples
           end
 
           unless state.nil?
-            # TODO: do we need to verify the final edge has the
-            # reduction, or is it required to?
             @lookback_relation[Edge[state, production]].add(edge)
             included.each do |other_edge|
               @includes_relation[other_edge].add(edge)
@@ -206,9 +204,13 @@ module LrExamples
         end
       end
 
+      # Here I have marked these sets as immutable because otherwise
+      # the Hash.with_default will insert new empty sets when they are
+      # used later.
       @includes_relation.freeze
       @lookback_relation.freeze
     end
+    private :compute_path_relations
 
     memoized def follow
       digraph(
