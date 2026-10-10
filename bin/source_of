@@ -9,4 +9,7 @@ target = ARGV[0]
 method = Pry::Method.from_str(ARGV[0])
 puts method.source_file
 puts method.source_line
+if method.comment
+  puts method.comment
+end
 puts method.source
